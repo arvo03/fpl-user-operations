@@ -1,12 +1,9 @@
 package com.fpl.operations.microservice.filtering;
 
 import java.lang.reflect.Field;
-import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
-import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
@@ -16,7 +13,7 @@ import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 public class Filtering implements FilteringInterface {
 
 	@Override
-	public SimpleFilterProvider includeAllBut(Set<String> list, Class c, String classFilterName) {
+	public SimpleFilterProvider includeAllBut(Set<String> list, Class<?> c, String classFilterName) {
 
 		Set<String> allFieldsOfClass = new HashSet<>();
 		for (Field f : c.getDeclaredFields())
@@ -29,7 +26,7 @@ public class Filtering implements FilteringInterface {
 	}
 
 	@Override
-	public SimpleFilterProvider excludeAllBut(Set<String> list, Class c, String classFilterName) {
+	public SimpleFilterProvider excludeAllBut(Set<String> list, Class<?> c, String classFilterName) {
 		
 		SimpleBeanPropertyFilter fieldsRequired = SimpleBeanPropertyFilter.filterOutAllExcept(list);
 		SimpleFilterProvider filters = new SimpleFilterProvider().addFilter(classFilterName, fieldsRequired);

@@ -1,19 +1,16 @@
 package com.fpl.operations.microservice.services;
 
 import java.net.URI;
-import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import javax.annotation.Resources;
-import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.Link;
-import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,12 +18,10 @@ import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import com.fpl.operations.microservice.controllers.UserRequestController;
 import com.fpl.operations.microservice.entities.FplUser;
 import com.fpl.operations.microservice.entities.FplUserGameweekRecord;
-import com.fpl.operations.microservice.exceptionHandling.FplException;
 import com.fpl.operations.microservice.exceptionHandling.FplUserException;
 import com.fpl.operations.microservice.filtering.FilteringInterface;
 import com.fpl.operations.microservice.repository.FplUserRepo;
@@ -42,8 +37,12 @@ public class FplUserService {
 	@Autowired
 	FilteringInterface filterInterface;
 
-	public List<FplUser> getAllUsers() {
-		return fplUserRepo.findAll();
+	public MappingJacksonValue getAllUsers() {
+		
+		SimpleFilterProvider filter = filterInterface.includeAllBut(Set.of("userPassword"), FplUser.class, "userPasswordFilter");
+		MappingJacksonValue fplUser = new MappingJacksonValue(fplUserRepo.findAll());
+		fplUser.setFilters(filter);
+		return fplUser;
 	}
 
 	public FplUser insertNewUser(String username, String password, char email) {
@@ -58,7 +57,7 @@ public class FplUserService {
 				.buildAndExpand(newlyAddedFplUser.getId()).toUri();
 		return ResponseEntity.created(location).build();
 	}
-
+	
 	public MappingJacksonValue getDetailsOfUser(long fplUserJpaId) {
 		if (fplUserRepo.findById(fplUserJpaId).isEmpty())
 			throw new FplUserException("id nahi mila-" + fplUserJpaId, HttpStatus.NOT_FOUND);
@@ -98,7 +97,7 @@ public class FplUserService {
 		return ResponseEntity.created(link).build();
 	}
 
-	public MappingJacksonValue getOldPassword(long fplUserJpaId) {
+	public MappingJacksonValue getCurrentPassword(long fplUserJpaId) {
 		if (fplUserRepo.findById(fplUserJpaId).isEmpty())
 			throw new FplUserException("No User with Id - " + fplUserJpaId, HttpStatus.NOT_FOUND);
 		MappingJacksonValue fplUser = new MappingJacksonValue(fplUserRepo.findById(fplUserJpaId).get());
@@ -106,6 +105,13 @@ public class FplUserService {
 				FplUser.class, "userPasswordFilter");
 		fplUser.setFilters(filters);
 		return fplUser;
+	}
+
+	public MappingJacksonValue getDistinctUserWithPassword(String string) {
+		SimpleFilterProvider filter = filterInterface.includeAllBut(new HashSet<>(), FplUser.class, "userPasswordFilter");
+		MappingJacksonValue fplUsers = new MappingJacksonValue(fplUserRepo.findDistinctFplUserByUserPassword(string));
+		fplUsers.setFilters(filter);
+		return fplUsers;
 	}
 
 }
