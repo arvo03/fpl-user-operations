@@ -17,10 +17,8 @@ import javax.persistence.Table;
 import javax.validation.Valid;
 import javax.validation.constraints.Size;
 
-import org.springframework.hateoas.RepresentationModel;
 
 import com.fasterxml.jackson.annotation.JsonFilter;
-import com.fasterxml.jackson.databind.annotation.JacksonStdImpl;
 
 @Entity
 @JsonFilter("userPasswordFilter")
@@ -53,14 +51,36 @@ public class FplUser {
 	@Column(name = "USER_EMAIL_VERIFICATION")
 	private char emailVerificationStatus;
 	
+	@Column(name = "TEAM_CREATED")
+	private char teamCreated;
+	
+	@Column(name = "TEAM_CREATED_GAMEWEEK")
+	private Integer teamCreatedInGameweekNumber;
+	
+	@Column(name = "WILDCARD_PLAYED")
+	private char wildcardPlayed;
+	
+	@Column(name = "TRIPLE_CAPTAIN_PLAYED")
+	private char tripleCaptainPlayed;
+	
+	@Column(name = "USER_ENABLED")
+	private char enabled;
+	
+	@Column(name = "ROLES")
+	private String authorities;
+	
 	@Valid
 	@OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.REMOVE}, targetEntity = FplUserGameweekRecord.class, fetch = FetchType.LAZY, mappedBy = "fplUser")
-	List<FplUserGameweekRecord> fplUserGameweekRecord = new ArrayList<>();
+	private List<FplUserGameweekRecord> fplUserGameweekRecord = new ArrayList<>();
 	
 	@Valid
 	@OneToOne(cascade = {CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.REMOVE}, targetEntity = FplUserInfo.class, fetch = FetchType.LAZY, mappedBy = "fplUser")
 	private FplUserInfo fplUserInfo;
-
+	
+	@Valid
+	@OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.REMOVE}, targetEntity = FplUserGameweekNumber.class, fetch = FetchType.LAZY, mappedBy = "fplUser")
+	private List<FplUserGameweekNumber> fplUserGameweekNumberList = new ArrayList<>();
+	
 	public long getId() {
 		return id;
 	}
@@ -100,6 +120,65 @@ public class FplUser {
 	public List<FplUserGameweekRecord> getFplUserGameweekRecord() {
 		return fplUserGameweekRecord;
 	}
-	
 
+	public void setFplUserGameweekRecord(List<FplUserGameweekRecord> fplUserGameweekRecord) {
+		this.fplUserGameweekRecord = fplUserGameweekRecord;
+	}
+	
+	public List<FplUserGameweekNumber> getFplUserGameweekNumberList() {
+		return fplUserGameweekNumberList;
+	}
+
+	public void setFplUserGameweekNumberList(List<FplUserGameweekNumber> fplUserGameweekNumberList) {
+		this.fplUserGameweekNumberList = fplUserGameweekNumberList;
+	}
+
+	public char getTeamCreated() {
+		return teamCreated;
+	}
+
+	public void setTeamCreated(char teamCreated) {
+		this.teamCreated = teamCreated;
+	}
+
+	public Integer getTeamCreatedInGameweekNumber() {
+		return teamCreatedInGameweekNumber;
+	}
+
+	public void setTeamCreatedInGameweekNumber(Integer teamCreatedInGameweekNumber) {
+		this.teamCreatedInGameweekNumber = teamCreatedInGameweekNumber;
+	}
+
+	public char getWildcardPlayed() {
+		return wildcardPlayed;
+	}
+
+	public void setWildcardPlayed(char wildcardPlayed) {
+		this.wildcardPlayed = wildcardPlayed;
+	}
+
+	public char getTripleCaptainPlayed() {
+		return tripleCaptainPlayed;
+	}
+
+	public void setTripleCaptainPlayed(char tripleCaptainPlayed) {
+		this.tripleCaptainPlayed = tripleCaptainPlayed;
+	}
+
+	public char getEnabled() {
+		return enabled;
+	}
+
+	public void setEnabled(char enabled) {
+		this.enabled = enabled;
+	}
+
+	public String getAuthorities() {
+		return authorities;
+	}
+
+	public void setAuthorities(String authorities) {
+		this.authorities = authorities;
+	}
+	
 }
